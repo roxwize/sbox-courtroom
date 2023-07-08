@@ -45,7 +45,7 @@
 	public void SentMessage()
 	{
 		Sandbox.Services.Stats.Increment( "messages_sent", 1 );
-		CourtroomGame.Speak( Entry.Text, SelectedCallout );
+		CourtroomGame.Speak( Entry.Text.Trim(), SelectedCallout );
 		Entry.Text = "";
 		SetCallout( Callout.None );
 		Close();

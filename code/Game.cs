@@ -25,10 +25,11 @@ public partial class CourtroomGame : GameManager
 	[Net] public Entity? Witness { get; set; }
 	[Net] public IEntity CurrentSpeaker { get; set; }
 	private IList<Message> MessageQueue { get; set; }
+	private bool IsDisplayingMessage = false;
 
 	public CourtroomGame()
 	{
-		MessageQueue = new List<Message>();
+		MessageQueue = new List<Message>(); // could maybe use Queue<T> in the future
 		
 		if ( Game.IsClient )
 		{
@@ -71,24 +72,34 @@ public partial class CourtroomGame : GameManager
 
 	public override void Simulate( IClient cl )
 	{
+		if ( !Game.IsServer ) return;
+		if ( MessageQueue.Count == 0 ) return;
+		if ( IsDisplayingMessage ) return;
+		DoMessage( MessageQueue );
 	}
 
 	public async Task DoMessage( Message message )
 	{
+		IsDisplayingMessage = true;
+		Log.Info( $"{message.Client.Name}: {message.Contents} {(message.Callout != Callout.None ? "(" + message.Callout + ")" : "")}" );
+		
 		if ( message.Callout != Callout.None )
 		{
 			CalloutScreen.Callout( message.Callout );
 			await GameTask.DelayRealtimeSeconds( 1.5f );
 			CalloutScreen.Hide();
-			Log.Info( "I be selecting these amazing texicans" );
 		}
-		
-		Log.Info( message.Client );
 
-		CurrentSpeaker = message.Client?.Pawn ?? Game.LocalPawn;
+		if ( message.Client.IsValid ) CurrentSpeaker = message.Client?.Pawn ?? Game.LocalPawn;
 		ChatBox.SetMessage( message.Client, message.Contents );
-		await GameTask.DelayRealtimeSeconds( TypewriterDelay / (float)message.Contents.Length + 0.8f );
-		Log.Info( "Done" );
+		await GameTask.DelayRealtimeSeconds( message.Contents.Length * (TypewriterDelay / 1000f) + 0.8f );
+		IsDisplayingMessage = false;
+	}
+
+	public async Task DoMessage( IList<Message> messages )
+	{
+		await DoMessage( messages[0] );
+		messages.RemoveAt( 0 );
 	}
 
 	public void SetRole( string? name, Entity? subject )
@@ -158,12 +169,10 @@ public partial class CourtroomGame : GameManager
 
 	public static void Speak( string message, Callout callout, IClient client )
 	{
-		var _m = new Message( message, callout ) { Client = client };
 		Current?.MessageQueue.Add( new Message(message, callout)
 		{
 			Client = client
 		} );
-		Current?.DoMessage( _m );
 	}
 	
 	[ConCmd.Server]
