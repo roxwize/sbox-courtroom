@@ -1,0 +1,82 @@
+{
+  "Title": "Courtroom",
+  "Type": "game",
+  "Org": "theki",
+  "Ident": "courtroom",
+  "Tags": null,
+  "Schema": 1,
+  "HasAssets": true,
+  "AssetsPath": "",
+  "Resources": null,
+  "MenuResources": "/MainMenu/*",
+  "HasCode": true,
+  "CodePath": "/code/",
+  "PackageReferences": [],
+  "EditorReferences": null,
+  "Metadata": {
+    "MaxPlayers": 4,
+    "MinPlayers": 1,
+    "GameNetworkType": "Multiplayer",
+    "MapSelect": "Tagged",
+    "MapList": [],
+    "RankType": "None",
+    "PerMapRanking": false,
+    "LeaderboardType": "None",
+    "ProjectTemplate": null,
+    "CsProjName": "",
+    "ControlModes": {
+      "Keyboard": true,
+      "Gamepad": true
+    },
+    "InputSettings": {
+      "Actions": [
+        {
+          "Name": "ChangeRole",
+          "KeyboardCode": "Q",
+          "GamepadCode": "SwitchRightMenu",
+          "GroupName": "Other"
+        },
+        {
+          "Name": "Chat",
+          "KeyboardCode": "T",
+          "GroupName": "Courtroom"
+        },
+        {
+          "Name": "Send",
+          "KeyboardCode": "enter",
+          "GroupName": "Courtroom"
+        },
+        {
+          "Name": "voice",
+          "KeyboardCode": "V",
+          "GroupName": "Other"
+        }
+      ]
+    },
+    "Physics": {
+      "SubSteps": 1,
+      "TimeScale": 1,
+      "Gravity": "0,0,-800",
+      "AirDensity": 1.2,
+      "SleepingEnabled": true,
+      "PositionIterations": 2,
+      "VelocityIterations": 8,
+      "SoftBodyIterations": 1,
+      "SoftBodySubsteps": 1
+    },
+    "PackageSettings": [
+      {
+        "DisplayType": "Float",
+        "Choices": [],
+        "ConVarName": "court_typewriter_delay",
+        "DisplayName": "Text Reveal Interval",
+        "DefaultValue": "0.04",
+        "Description": "How long to wait before revealing the next character of a message when displaying it in a \u0022typewriter\u0022 fashion.",
+        "Group": "",
+        "Minimum": 0.01,
+        "Maximum": 1,
+        "Step": 0.01
+      }
+    ]
+  }
+}

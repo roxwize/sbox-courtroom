@@ -1,0 +1,15 @@
+﻿StatusBar {
+  height: 10%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #fff9;
+  border: 3px solid #000c;
+  align-items: center;
+  margin: 24px;
+  font-size:50px;
+  
+  label {
+    margin: 0 16px 0 0;
+  }
+}

@@ -1,0 +1,71 @@
+﻿@using System
+@using Sandbox
+@using Sandbox.UI
+
+@namespace ThekiFake.Courtroom
+@inherits Panel
+
+<root>
+	<div id="container-callouts">
+		<label class="btn" onclick="@(() => SetCallout( Callout.Objection ))">Objection!</label>
+		<label class="btn" onclick="@(() => SetCallout( Callout.HoldIt ))">Hold it!</label>
+		<label class="btn" onclick="@(() => SetCallout( Callout.TakeThat ))">Take that!</label>
+		<label class="btn" onclick="@(() => SetCallout( Callout.None ))">None</label>
+	</div>
+	<div id="container-textentry">
+		<MessageTextEntry @ref="Entry" Placeholder="ENTER to send" Parent="@this" MinLength="@(2)" MaxLength="@(200)" />
+	</div>
+</root>
+
+@code
+{
+	public MessageTextEntry Entry;
+	public Callout SelectedCallout = Callout.None;
+
+	public MessageField()
+	{
+		
+	}
+
+	[GameEvent.Client.BuildInput]
+	void BuildInput()
+	{
+		if ( Input.Pressed( "Chat" ) )
+		{
+			if ( HasClass( "open" ) ) Close();
+			else
+			{
+				Open();
+				Entry.Focus();
+			}
+		}
+	}
+
+	[CourtEvent.MessageSent]
+	public void SentMessage()
+	{
+		Sandbox.Services.Stats.Increment( "messages_sent", 1 );
+		CourtroomGame.Speak( Entry.Text, SelectedCallout );
+		Entry.Text = "";
+		SetCallout( Callout.None );
+		Close();
+	}
+
+	void SetCallout( Callout callout )
+	{
+		SelectedCallout = callout;
+		Entry.Placeholder = callout + "!";
+	}
+
+	public void Open()
+	{
+		AddClass( "open" );
+		RemoveClass( "close" );
+	}
+	
+	public void Close()
+	{
+		AddClass( "close" );
+		RemoveClass( "open" );
+	}
+}

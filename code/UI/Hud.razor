@@ -1,0 +1,32 @@
+﻿@using Sandbox
+@using Sandbox.UI
+
+@namespace ThekiFake.Courtroom
+@inherits RootPanel
+@attribute [StyleSheet("/Resource/styles.scss")]
+
+<root>
+	<div class="display">
+		<StatusBar/>
+		<div id="chatbox">
+			<ChatBox />
+		</div>
+	</div>
+</root>
+
+@code
+{
+	private RoleMenu _roleMenu;
+
+	public Hud()
+	{
+		_roleMenu = AddChild<RoleMenu>();
+		AddChild<CalloutScreen>().AddClass( "hidden" );
+	}
+	
+	public override void Tick()
+	{
+		_roleMenu.BindClass( "hidden", () => !string.IsNullOrEmpty((Game.LocalPawn as CourtroomPawn)?.PositionTitle) );
+		if ( Input.Pressed( "ChangeRole" ) ) CourtroomGame.Unbecome();
+	}
+}

@@ -1,0 +1,25 @@
+﻿@using System
+@using Sandbox
+@using Sandbox.UI
+
+@namespace ThekiFake.Courtroom
+@inherits Panel
+@attribute [StyleSheet("/UI/StatusBar.scss")]
+
+<root>
+	<img src="avatar:@Game.LocalClient.SteamId" class="avatar" alt="" />
+	<label style="">@_pawn.PositionTitle</label>
+	<label style="font-weight:bold;">@Game.LocalClient.Name</label>
+	<label>|</label>
+	<label class="btn" onclick=@CourtroomGame.Unbecome>Change Role</label>
+</root>
+
+@code
+{
+	private CourtroomPawn _pawn = Game.LocalPawn as CourtroomPawn;
+	
+	protected override int BuildHash()
+	{
+		return HashCode.Combine( _pawn.PositionTitle );
+	}
+}

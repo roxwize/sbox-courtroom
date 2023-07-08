@@ -1,0 +1,34 @@
+﻿RoleMenu {
+  background-color: #989898;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  text-align: center;
+  z-index: 99;
+  
+  div {
+    flex-direction: column;
+    align-items: center;
+    
+    span {
+      align-items: center;
+      font-size: 50px;
+    }
+    
+    .role-menu {
+      flex-direction: row;
+      flex-grow: 1;
+      flex-shrink: 1;
+      
+      label {
+        padding: 20px;
+        font-size: 50px;
+        margin: 20px;
+      }
+    }
+  }
+}

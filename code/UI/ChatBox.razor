@@ -1,0 +1,82 @@
+﻿@using System.Text
+@using System.Threading.Tasks
+@using Sandbox
+@using Sandbox.UI
+
+@namespace ThekiFake.Courtroom
+@inherits Panel
+@attribute [StyleSheet("/UI/ChatBox.scss")]
+
+<root>
+	<MessageField class="close" />
+	<div id="left-field">
+		<div id="left-field-top">
+			<img class="avatar" src="" alt="" @ref="AvatarImage"/>
+			<label @ref="AvatarName"></label>
+		</div>
+		<div id="left-field-bottom">
+			<label @ref="Contents"></label>
+		</div>
+	</div>
+</root>
+
+@code
+{
+	public static ChatBox Current;
+	
+	Image AvatarImage;
+	Label AvatarName;
+	Label Contents;
+	string Message;
+	StringBuilder _builder;
+
+	public ChatBox()
+	{
+		Current = this;
+		_builder = new StringBuilder();
+	}
+	
+	/// <summary>
+	///		Sets the message along with the avatar image and username
+	/// </summary>
+	[ClientRpc]
+	public static void SetMessage( IClient client, string message )
+	{
+		if ( Current is null ) return;
+		if ( client?.IsValid == true )
+		{
+			Current.AvatarImage.SetTexture( !client.IsBot ? $"avatar:{client.SteamId}" : "avatar:76561198300196951" );
+			Current.AvatarName.Text = client.Name;
+		}
+		else
+		{
+			Current.AvatarImage.SetTexture( "avatar:76561198300196951" );
+			Current.AvatarName.Text = "????";
+		}
+		Current.Message = message;
+		Current.Reveal();
+	}
+	/// <summary>
+	///		Doesn't
+	/// </summary>
+	[ClientRpc]
+	public static void SetMessage( string message )
+	{
+		if ( Current is null ) return;
+		
+		Current.Contents.Text = message;
+	}
+
+	public async void Reveal()
+	{
+		_builder.Clear();
+		var m = Message.ToCharArray();
+		for (var i = 0; i < m.Length; i++)
+		{
+			_builder.Append( m[i] );
+			if (i % 2 == 0) PlaySound( "boop" );
+			SetMessage( _builder.ToString() );
+			await GameTask.DelayRealtime( CourtroomGame.Current?.TypewriterDelay ?? 40 );
+		}
+	}
+}

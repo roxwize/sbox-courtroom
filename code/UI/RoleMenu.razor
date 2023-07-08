@@ -1,0 +1,41 @@
+﻿@using Sandbox
+@using Sandbox.UI
+
+@namespace ThekiFake.Courtroom
+@inherits Panel
+@attribute [StyleSheet("/UI/RoleMenu.scss")]
+
+<root>
+	<div>
+		<span>
+			<label>Hello, </label>
+			<img class="avatar" src="avatar:@Game.LocalClient.SteamId" alt="" />
+			<label style="font-weight:bold;">@Game.LocalClient.Name</label>
+		</span>
+		<label style="font-weight:bold;font-size:100px;">Choose your role</label>
+		<div class="role-menu">
+			@* TODO: Add an indicator to these representing player names if the position is already taken *@
+			<label class="btn" onclick=@(() => { Become( "Judge" ); })>Judge</label> 
+			<label class="btn" onclick=@(() => { Become( "Prosecutor" ); })>Prosecutor</label>
+			<label class="btn" onclick=@(() => { Become( "Defendant" ); })>Defendant</label>
+			<label class="btn" onclick=@(() => { Become( "Witness" ); })>Witness</label>
+		</div>
+		<label style="font-weight:bold;font-size:50px;" @ref="ErrorLabel"></label>
+	</div>
+</root>
+
+@code
+{
+	public static RoleMenu Current;
+	public Label ErrorLabel;
+
+	public RoleMenu()
+	{
+		Current = this;
+	}
+	
+	private void Become( string name )
+	{
+		CourtroomGame.BecomePosition( name );
+	}
+}
