@@ -1,14 +1,13 @@
 ﻿#nullable enable
 using Sandbox;
-using Sandbox.UI.Construct;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace ThekiFake.Courtroom;
 
+// TODO: Jury, assistant positions, limit callouts by role, add order in the court/gavel pound or whatever
 public partial class CourtroomGame : GameManager
 {
 	public new static CourtroomGame? Current => GameManager.Current as CourtroomGame;
@@ -18,18 +17,42 @@ public partial class CourtroomGame : GameManager
 	public int TypewriterDelay { get; set; } = 40;
 	
 	[Net] public Hud Hud { get; set; }
-	
-	[Net] public Entity? Judge { get; set; }
-	[Net] public Entity? Defendant { get; set; }
-	[Net] public Entity? Prosecutor { get; set; }
-	[Net] public Entity? Witness { get; set; }
+
+	public Role Judge = new("Judge")
+	{
+		PossibleCallouts = new []
+		{
+			true, false, false, false, true
+		}
+	};
+	public Role Defendant = new("Defendant")
+	{
+		PossibleCallouts = new []
+		{
+			true, true, true, true, false
+		}
+	};
+	public Role Prosecutor = new("Prosecutor")
+	{
+		PossibleCallouts = new []
+		{
+			true, true, true, true, false
+		}
+	};
+	public Role Witness = new("Witness")
+	{
+		PossibleCallouts = new []
+		{
+			true, false, false, false, false // cant use objections or anything like that. stupid fucking loser
+		}
+	};
 	[Net] public IEntity CurrentSpeaker { get; set; }
-	private IList<Message> MessageQueue { get; set; }
-	private bool IsDisplayingMessage = false;
+	private Queue<Message> MessageQueue { get; set; }
+	private bool IsDisplayingMessage;
 
 	public CourtroomGame()
 	{
-		MessageQueue = new List<Message>(); // could maybe use Queue<T> in the future
+		MessageQueue = new Queue<Message>(); // could maybe use Queue<T> in the future
 		
 		if ( Game.IsClient )
 		{
@@ -72,17 +95,27 @@ public partial class CourtroomGame : GameManager
 
 	public override void Simulate( IClient cl )
 	{
+		if ( IsDisplayingMessage ) // do we need two variables for this?
+		{
+			var c = CurrentSpeaker as CourtroomPawn;
+			if ( (c?.IsValid ?? false) && c.IsSpeaking )
+			{
+				c.SetAnimParameter( "voice", (float)((Math.Sin( Time.Tick ) + 1) / 2) );
+			}
+			return;
+		}
 		if ( !Game.IsServer ) return;
 		if ( MessageQueue.Count == 0 ) return;
-		if ( IsDisplayingMessage ) return;
-		DoMessage( MessageQueue );
+		DoMessage( MessageQueue.Dequeue() );
 	}
 
-	public async Task DoMessage( Message message )
+	private async void DoMessage( Message message )
 	{
 		IsDisplayingMessage = true;
 		Log.Info( $"{message.Client.Name}: {message.Contents} {(message.Callout != Callout.None ? "(" + message.Callout + ")" : "")}" );
-		
+
+		CourtroomPawn? e = null;
+		if ( message.Client.IsValid ) e = message.Client?.Pawn as CourtroomPawn;
 		if ( message.Callout != Callout.None )
 		{
 			CalloutScreen.Callout( message.Callout );
@@ -90,19 +123,17 @@ public partial class CourtroomGame : GameManager
 			CalloutScreen.Hide();
 		}
 
-		if ( message.Client.IsValid ) CurrentSpeaker = message.Client?.Pawn ?? Game.LocalPawn;
+		CurrentSpeaker = e ?? Game.LocalPawn;
+		if ( e?.IsValid ?? false ) e.IsSpeaking = true;
+		// e?.SetAnimParameter( "voice", 1 ); // (float)((Math.Sin( Time.Delta ) + 1) / 2)
 		ChatBox.SetMessage( message.Client, message.Contents );
-		await GameTask.DelayRealtimeSeconds( message.Contents.Length * (TypewriterDelay / 1000f) + 0.8f );
+		await GameTask.DelayRealtimeSeconds( message.Contents.Length * (TypewriterDelay / 1000f) );
+		if ( e?.IsValid ?? false ) { e.IsSpeaking = false; e.SetAnimParameter( "voice", 0 ); }
+		await GameTask.DelayRealtimeSeconds( 0.8f );
 		IsDisplayingMessage = false;
 	}
 
-	public async Task DoMessage( IList<Message> messages )
-	{
-		await DoMessage( messages[0] );
-		messages.RemoveAt( 0 );
-	}
-
-	public void SetRole( string? name, Entity? subject )
+	private void SetRole( string? name, IEntity? subject )
 	{
 		Game.AssertServer();
 		if ( name is null ) return;
@@ -110,21 +141,21 @@ public partial class CourtroomGame : GameManager
 		switch ( name )
 		{
 			case "Judge":
-				Judge = subject;
+				Judge.Entity = subject;
 				break;
 			case "Prosecutor":
-				Prosecutor = subject;
+				Prosecutor.Entity = subject;
 				break;
 			case "Defendant":
-				Defendant = subject;
+				Defendant.Entity = subject;
 				break;
 			case "Witness":
-				Witness = subject;
+				Witness.Entity = subject;
 				break;
 		}
 	}
 	
-	public Entity? GetRole( string name )
+	public Role? GetRole( string name )
 	{
 		return name switch
 		{
@@ -147,13 +178,14 @@ public partial class CourtroomGame : GameManager
 		if ( Current == null ) return;
 
 		var p = Current.GetRole( name );
-		if ( p is not null )
+		if ( p?.Entity is not null )
 		{
-			RoleMenu.Notice( To.Single( ConsoleSystem.Caller ), name, Current.GetRole( name )?.Client.Name );
+			RoleMenu.Notice( To.Single( ConsoleSystem.Caller ), name, Current.GetRole( name )?.Entity?.Client.Name );
 			return;
 		}
 		Current.SetRole( name, pawn );
-		
+		MessageField.SetPossibleCallouts( p?.PossibleCallouts );
+
 		pawn.PositionTitle = name;
 		pawn.Respawn();
 	}
@@ -169,7 +201,7 @@ public partial class CourtroomGame : GameManager
 
 	public static void Speak( string message, Callout callout, IClient client )
 	{
-		Current?.MessageQueue.Add( new Message(message, callout)
+		Current?.MessageQueue.Enqueue( new Message(message, callout)
 		{
 			Client = client
 		} );

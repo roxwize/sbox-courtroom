@@ -43,6 +43,11 @@
 	public static void SetMessage( IClient client, string message )
 	{
 		if ( Current is null ) return;
+		if ( Current.Message?.Length > 0 )
+		{
+			Current._builder.Clear();
+			Current.Message = "";
+		}
 		if ( client?.IsValid == true )
 		{
 			Current.AvatarImage.SetTexture( !client.IsBot ? $"avatar:{client.SteamId}" : "avatar:76561198300196951" );

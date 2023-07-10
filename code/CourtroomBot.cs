@@ -45,24 +45,24 @@ public class CourtroomBot : Bot
 	public override void Tick()
 	{
 		_me = Client.Pawn as CourtroomPawn;
-		if ( _me?.PositionTitle == null )
+		if ( _me is null ) return;
+		if ( _me.PositionTitle is null )
 		{
 			var g = CourtroomGame.Current;
 			if ( g == null ) return;
 		
-			if ( g.Witness == null ) { g.Witness = Client.Pawn as Entity; _me.PositionTitle = "Witness"; _me.Respawn(); return; }
-			if ( g.Defendant == null ) { g.Defendant = Client.Pawn as Entity; _me.PositionTitle = "Defendant"; _me.Respawn(); return; }
-			if ( g.Prosecutor == null ) { g.Prosecutor = Client.Pawn as Entity; _me.PositionTitle = "Prosecutor"; _me.Respawn(); return; }
-			if ( g.Judge == null ) { g.Judge = Client.Pawn as Entity; _me.PositionTitle = "Judge"; _me.Respawn(); return; }
+			if ( g.Witness.Entity == null ) { g.Witness.Entity = Client.Pawn; _me.PositionTitle = "Witness"; _me.Respawn(); return; }
+			if ( g.Defendant.Entity == null ) { g.Defendant.Entity = Client.Pawn; _me.PositionTitle = "Defendant"; _me.Respawn(); return; }
+			if ( g.Prosecutor.Entity == null ) { g.Prosecutor.Entity = Client.Pawn; _me.PositionTitle = "Prosecutor"; _me.Respawn(); return; }
+			if ( g.Judge.Entity == null ) { g.Judge.Entity = Client.Pawn; _me.PositionTitle = "Judge"; _me.Respawn(); return; }
 		}
-		
-		if ( _timeSinceSaidAnything > 5 )
-		{
-			var vals = Enum.GetValues<Callout>();
-			var callout = Callout.None;
-			if ( _random.Next( 0, 10 ) > 7 ) callout = vals[_random.Next(1, vals.Length)];
-			CourtroomGame.Speak( _stupidShitThatICanSay[_random.Next(0, _stupidShitThatICanSay.Length)], callout, Client );
-			_timeSinceSaidAnything = 0;
-		}
+
+		if ( !(_timeSinceSaidAnything > 5) ) return;
+
+		var vals = Enum.GetValues<Callout>();
+		Callout callout = Callout.None;
+		if ( _random.Next( 0, 10 ) > 7 ) callout = vals[_random.Next(1, vals.Length)];
+		CourtroomGame.Speak( _stupidShitThatICanSay[_random.Next(0, _stupidShitThatICanSay.Length)], callout, Client );
+		_timeSinceSaidAnything = 0;
 	}
 }

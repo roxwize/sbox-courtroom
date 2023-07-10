@@ -10,7 +10,8 @@ partial class CourtroomPawn : AnimatedEntity
 	private static readonly Vector3 Rot = new( 0, 0, 1 );
 	
 	[Net] public string PositionTitle { get; set; }
-
+	public Role? Role => CourtroomGame.Current?.GetRole( PositionTitle );
+	[Net] public bool IsSpeaking { get; set; }
 	[Net] public TimeSince TimeSinceJoined { get; set; }
 	
 	public override void Spawn()
@@ -70,5 +71,10 @@ partial class CourtroomPawn : AnimatedEntity
 		Camera.FieldOfView = Screen.CreateVerticalFieldOfView( 60 );
 
 		Camera.FirstPersonViewer = null;
+	}
+
+	public bool CanDoCallout( Callout callout )
+	{
+		return Role?.PossibleCallouts[(int)callout] ?? false;
 	}
 }

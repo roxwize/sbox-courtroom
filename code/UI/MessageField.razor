@@ -7,10 +7,16 @@
 
 <root>
 	<div id="container-callouts">
-		<label class="btn" onclick="@(() => SetCallout( Callout.Objection ))">Objection!</label>
-		<label class="btn" onclick="@(() => SetCallout( Callout.HoldIt ))">Hold it!</label>
-		<label class="btn" onclick="@(() => SetCallout( Callout.TakeThat ))">Take that!</label>
-		<label class="btn" onclick="@(() => SetCallout( Callout.None ))">None</label>
+		@if ( Callouts is not null )
+		{
+			@foreach ( Callout callout in Enum.GetValues( typeof(Callout) ) )
+			{
+				@if ( Callouts[(int)callout] )
+				{
+					<label class="btn" onclick="@(() => SetCallout( callout ))">@Message.CalloutString( callout )</label>
+				}
+			}
+		}
 	</div>
 	<div id="container-textentry">
 		<MessageTextEntry @ref="Entry" Placeholder="ENTER to send" Parent="@this" MinLength="@(2)" MaxLength="@(200)" />
@@ -19,12 +25,15 @@
 
 @code
 {
+	public static MessageField Current;
+	
 	public MessageTextEntry Entry;
 	public Callout SelectedCallout = Callout.None;
+	bool[] Callouts;
 
 	public MessageField()
 	{
-		
+		Current = this;
 	}
 
 	[GameEvent.Client.BuildInput]
@@ -50,17 +59,25 @@
 		SetCallout( Callout.None );
 		Close();
 	}
+	
+	// There is obviously a better way to do this
+	[ClientRpc]
+	public static void SetPossibleCallouts( bool[] callouts )
+	{
+		Current.Callouts = callouts;
+	}
 
 	void SetCallout( Callout callout )
 	{
 		SelectedCallout = callout;
-		Entry.Placeholder = callout + "!";
+		Entry.Placeholder = Message.CalloutString( callout );
 	}
 
 	public void Open()
 	{
 		AddClass( "open" );
 		RemoveClass( "close" );
+		StateHasChanged();
 	}
 	
 	public void Close()
