@@ -25,6 +25,7 @@ public partial class CalloutScreen : Panel
 	{
 		if ( Current == null ) return;
 		Current.Show();
+		Sound.FromScreen( "exclaim" );
 		switch ( callout )
 		{
 			case Courtroom.Callout.Objection:

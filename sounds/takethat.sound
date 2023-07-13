@@ -3,9 +3,12 @@
   "Volume": "1.00,1.00,0",
   "Pitch": "1.00,1.00,0",
   "Decibels": 90,
-  "SelectionMode": "Random",
+  "SelectionMode": "RandomExclusive",
   "Sounds": [
-    "sounds/vfx_takethat.vsnd"
+    "sounds/va_takethat01.vsnd",
+    "sounds/va_takethat02.vsnd",
+    "sounds/va_takethat03.vsnd",
+    "sounds/va_takethat04.vsnd"
   ],
   "MaximumDistance": 1870.0942,
   "MinimumDistance": 93.504715

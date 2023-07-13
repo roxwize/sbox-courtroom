@@ -1,7 +1,7 @@
 ﻿using System;
-using ThekiFake.Courtroom;
+using Sandbox;
 
-namespace Sandbox;
+namespace ThekiFake.Courtroom;
 
 /// <summary>
 /// This is hacked together because I'm not using it in production so why the fuck should i bother making it Perfect
@@ -11,8 +11,12 @@ public class CourtroomBot : Bot
 	private CourtroomPawn _me;
 	private TimeSince _timeSinceSaidAnything = 0;
 	private Random _random = new();
+
+	private static string wantssay;
+	private static bool willsay;
+	private static Callout wantssay_callout;
 	
-	private static string[] _stupidShitThatICanSay = new[]
+	private static string[] _stupidShitThatICanSay =
 	{
 		"I am robot",
 		"6 is a robot",
@@ -42,6 +46,14 @@ public class CourtroomBot : Bot
 		_ = new CourtroomBot();
 	}
 
+	[ConCmd.Admin("court_bot_say")]
+	public static void Say( string say, int callout = 0 )
+	{
+		wantssay = say;
+		wantssay_callout = Enum.GetValues<Callout>()[callout];
+		willsay = true;
+	}
+
 	public override void Tick()
 	{
 		_me = Client.Pawn as CourtroomPawn;
@@ -57,6 +69,13 @@ public class CourtroomBot : Bot
 			if ( g.Judge.Entity == null ) { g.Judge.Entity = Client.Pawn; _me.PositionTitle = "Judge"; _me.Respawn(); return; }
 		}
 
+		if ( willsay )
+		{
+			CourtroomGame.Speak( wantssay, wantssay_callout, Client );
+			willsay = false;
+		}
+
+		return;
 		if ( !(_timeSinceSaidAnything > 5) ) return;
 
 		var vals = Enum.GetValues<Callout>();

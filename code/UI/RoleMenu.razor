@@ -6,7 +6,7 @@
 @attribute [StyleSheet("/UI/RoleMenu.scss")]
 
 <root>
-	<div>
+	<div id="role-main">
 		<span>
 			<label>Hello, </label>
 			<img class="avatar" src="avatar:@Game.LocalClient.SteamId" alt="" />
@@ -21,6 +21,10 @@
 			<label class="btn" onclick=@(() => { Become( "Witness" ); })>Witness</label>
 		</div>
 		<label style="font-weight:bold;font-size:50px;" @ref="ErrorLabel"></label>
+	</div>
+	<div id="credits">
+		<label>Callout voicelines by TommuVA</label>
+		<label>Exclamation sound effect from Ace Attorney by Capcom</label>
 	</div>
 </root>
 

@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 
 namespace ThekiFake.Courtroom;
 
-// TODO: Jury, assistant positions, limit callouts by role, add order in the court/gavel pound or whatever
+// TODO: Jury, assistant positions, add order in the court/gavel pound or whatever
+// TODO (2): Have the role selection menu hide certain roles if spawnpoints for them arent present in the map (maybe convert the roles list to a hashmap for this) - basically let maps define their own roles
+// ReSharper disable once ClassNeverInstantiated.Global
 public partial class CourtroomGame : GameManager
 {
 	public new static CourtroomGame? Current => GameManager.Current as CourtroomGame;
-	public const bool DEBUG = true;
 
 	[ConVar.Replicated( "court_typewriter_delay", Help = "How long to wait before revealing message characters in milliseconds" )]
 	public int TypewriterDelay { get; set; } = 40;
@@ -49,6 +50,7 @@ public partial class CourtroomGame : GameManager
 	[Net] public IEntity CurrentSpeaker { get; set; }
 	private Queue<Message> MessageQueue { get; set; }
 	private bool IsDisplayingMessage;
+	[Net, Predicted] public bool SmoothPan { get; set; } = false;
 
 	public CourtroomGame()
 	{
@@ -57,10 +59,6 @@ public partial class CourtroomGame : GameManager
 		if ( Game.IsClient )
 		{
 			Hud = new Hud();
-		}
-		
-		if ( DEBUG )
-		{
 		}
 	}
 
@@ -121,6 +119,7 @@ public partial class CourtroomGame : GameManager
 			CalloutScreen.Callout( message.Callout );
 			await GameTask.DelayRealtimeSeconds( 1.5f );
 			CalloutScreen.Hide();
+			SmoothPan = true;
 		}
 
 		CurrentSpeaker = e ?? Game.LocalPawn;
@@ -131,6 +130,7 @@ public partial class CourtroomGame : GameManager
 		if ( e?.IsValid ?? false ) { e.IsSpeaking = false; e.SetAnimParameter( "voice", 0 ); }
 		await GameTask.DelayRealtimeSeconds( 0.8f );
 		IsDisplayingMessage = false;
+		SmoothPan = false;
 	}
 
 	private void SetRole( string? name, IEntity? subject )
@@ -197,6 +197,7 @@ public partial class CourtroomGame : GameManager
 		if ( pawn == null || Current == null ) return;
 		Current.SetRole( pawn.PositionTitle, null );
 		pawn.PositionTitle = "";
+		pawn.Respawn();
 	}
 
 	public static void Speak( string message, Callout callout, IClient client )

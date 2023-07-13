@@ -77,6 +77,19 @@
         "Maximum": 1,
         "Step": 0.01
       }
+    ],
+    "TickRate": 50,
+    "LaunchConfigs": [
+      {
+        "Name": "Placeholder Courtroom",
+        "GameIdent": "theki.courtroom#local",
+        "MapName": "theki.placeholder_courtroom",
+        "MaxPlayers": 6,
+        "GameSettings": {},
+        "Addons": "",
+        "PreLaunchCommand": "",
+        "PostLaunchCommand": ""
+      }
     ]
   }
 }

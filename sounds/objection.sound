@@ -3,9 +3,13 @@
   "Volume": "1.00,1.00,0",
   "Pitch": "1.00,1.00,0",
   "Decibels": 90,
-  "SelectionMode": "Random",
+  "SelectionMode": "RandomExclusive",
   "Sounds": [
-    "sounds/vfx_objection.vsnd"
+    "sounds/va_objection01.vsnd",
+    "sounds/va_objection02.vsnd",
+    "sounds/va_objection03.vsnd",
+    "sounds/va_objection04.vsnd",
+    "sounds/va_objection05.vsnd"
   ],
   "MaximumDistance": 1870.0942,
   "MinimumDistance": 93.504715

@@ -1,11 +1,11 @@
 {
   "UI": true,
-  "Volume": "0.80,0.80,0",
+  "Volume": "0.60,0.60,0",
   "Pitch": "1.00,1.00,0",
   "Decibels": 70,
   "SelectionMode": "Random",
   "Sounds": [
-    "sounds/boop.vsnd"
+    "sounds/sfx_exclaim.vsnd"
   ],
   "MaximumDistance": 1143.9335,
   "MinimumDistance": 57.196674

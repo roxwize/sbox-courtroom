@@ -1,9 +1,8 @@
 ﻿using Sandbox;
 using System;
 using System.Linq;
-using ThekiFake.Courtroom;
 
-namespace Sandbox;
+namespace ThekiFake.Courtroom;
 
 partial class CourtroomPawn : AnimatedEntity
 {
@@ -46,10 +45,10 @@ partial class CourtroomPawn : AnimatedEntity
 		c.DressEntity( this );
 	}
 
-	public override void Simulate( IClient cl )
-	{
-		base.Simulate( cl );
-	}
+	// public override void Simulate( IClient cl )
+	// {
+	// 	base.Simulate( cl );
+	// }
 
 	public void Tick()
 	{
@@ -63,10 +62,22 @@ partial class CourtroomPawn : AnimatedEntity
 		var s = CourtroomGame.Current?.CurrentSpeaker;
 		s ??= this;
 		
-		Camera.Rotation = Rotation.LookAt( s.Position, Vector3.Up ).Angles().WithPitch( 0f ).ToRotation();
-		Camera.Position = s.Position + s.Rotation.Forward * 100
+		var rot = Rotation.LookAt( s.Position, Vector3.Up ).Angles().WithPitch( 0f ).ToRotation();
+		var pos = s.Position + s.Rotation.Forward * 100
 		                             + Vector3.Up * 50
 									 ;
+
+		if ( CourtroomGame.Current is not { } c ) return;
+		if ( !c.SmoothPan )
+		{
+			Camera.Position = pos;
+			Camera.Rotation = rot;
+		}
+		else
+		{
+			Camera.Position = Vector3.Lerp( Camera.Position, pos, Time.Delta * 10 );
+			Camera.Rotation = Rotation.Lerp( Camera.Rotation, rot, Time.Delta * 10 );
+		}
 
 		Camera.FieldOfView = Screen.CreateVerticalFieldOfView( 60 );
 

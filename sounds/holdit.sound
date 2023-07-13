@@ -3,9 +3,11 @@
   "Volume": "1.00,1.00,0",
   "Pitch": "1.00,1.00,0",
   "Decibels": 90,
-  "SelectionMode": "Random",
+  "SelectionMode": "RandomExclusive",
   "Sounds": [
-    "sounds/vfx_holdit.vsnd"
+    "sounds/va_holdit01.vsnd",
+    "sounds/va_holdit02.vsnd",
+    "sounds/va_holdit03.vsnd"
   ],
   "MaximumDistance": 1870.0942,
   "MinimumDistance": 93.504715
