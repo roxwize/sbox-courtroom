@@ -75,8 +75,8 @@ partial class CourtroomPawn : AnimatedEntity
 		}
 		else
 		{
-			Camera.Position = Vector3.Lerp( Camera.Position, pos, Time.Delta * 10 );
-			Camera.Rotation = Rotation.Lerp( Camera.Rotation, rot, Time.Delta * 10 );
+			Camera.Position = Vector3.Lerp( Camera.Position, pos, Time.Delta * 5 );
+			Camera.Rotation = Rotation.Lerp( Camera.Rotation, rot, Time.Delta * 7 );
 		}
 
 		Camera.FieldOfView = Screen.CreateVerticalFieldOfView( 60 );

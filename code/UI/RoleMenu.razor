@@ -22,9 +22,14 @@
 		</div>
 		<label style="font-weight:bold;font-size:50px;" @ref="ErrorLabel"></label>
 	</div>
+	<div id="role-leaderboard">
+		<label>Most messages sent</label>
+		<Leaderboard @ref="Leaderboard" />
+		<a class="btn" onclick="@(() => { Leaderboard.Update(); })">Refresh</a>
+	</div>
 	<div id="credits">
 		<label>Callout voicelines by TommuVA</label>
-		<label>Exclamation sound effect from Ace Attorney by Capcom</label>
+		<label>Exclamation sound effect from Phoenix Wright: Ace Attorney by Capcom</label>
 	</div>
 </root>
 
@@ -32,6 +37,7 @@
 {
 	public static RoleMenu Current;
 	public Label ErrorLabel;
+	public Leaderboard Leaderboard;
 
 	public RoleMenu()
 	{

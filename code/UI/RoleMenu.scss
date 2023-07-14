@@ -32,11 +32,59 @@
     }
   }
   
+  #role-leaderboard {
+    flex-direction: column;
+    margin: 20px;
+    width: 20%;
+    
+    Leaderboard {
+      flex-direction: column;
+      overflow: scroll;
+      flex-shrink: 0;
+      height: 90%;
+      
+      LeaderboardEntry {
+        flex-shrink: 0;
+        align-items: center;
+        background-color: #ccc;
+        padding: 12px;
+
+        &:nth-child(odd) {
+          background-color: #aaa;
+        }
+        &:first-child {
+          font-weight: bold;
+          background-color: #222;
+          color: white;
+        }
+        &:hover {
+          
+        }
+        
+        .leaderboard-name {
+          flex-grow: 1;
+          justify-content: center;
+          align-items: center;
+          
+          img {
+            width: 20%;
+          }
+          label {
+          }
+        }
+      }
+    }
+    
+    & > label, a.btn {
+      margin: 20px 0;
+    }
+  }
+  
   #credits {
     position: absolute;
     bottom: 12px;
     left: 12px;
-    font-size: 40px;
+    font-size: 35px;
     flex-direction: column;
     
     label {

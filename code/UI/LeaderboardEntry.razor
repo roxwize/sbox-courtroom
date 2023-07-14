@@ -1,0 +1,19 @@
+﻿@using Sandbox.Services
+@using Sandbox.UI
+
+@namespace ThekiFake.Courtroom
+@inherits Panel
+
+<root>
+	<label class="leaderboard-rank">@Entry.Rank</label>
+	<div class="leaderboard-name">
+		<img src="avatar:@Entry.SteamId" alt="" class="avatar"  />
+		<label>@Entry.DisplayName</label>
+	</div>
+	<label class="leaderboard-val">@Entry.Value</label>
+</root>
+
+@code
+{
+	public Leaderboards.Entry Entry;
+}
