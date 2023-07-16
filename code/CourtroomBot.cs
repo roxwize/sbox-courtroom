@@ -58,15 +58,20 @@ public class CourtroomBot : Bot
 	{
 		_me = Client.Pawn as CourtroomPawn;
 		if ( _me is null ) return;
-		if ( _me.PositionTitle is null )
+		if ( _me.Role is null )
 		{
 			var g = CourtroomGame.Current;
 			if ( g == null ) return;
 		
-			if ( g.Witness.Entity == null ) { g.Witness.Entity = Client.Pawn; _me.PositionTitle = "Witness"; _me.Respawn(); return; }
-			if ( g.Defendant.Entity == null ) { g.Defendant.Entity = Client.Pawn; _me.PositionTitle = "Defendant"; _me.Respawn(); return; }
-			if ( g.Prosecutor.Entity == null ) { g.Prosecutor.Entity = Client.Pawn; _me.PositionTitle = "Prosecutor"; _me.Respawn(); return; }
-			if ( g.Judge.Entity == null ) { g.Judge.Entity = Client.Pawn; _me.PositionTitle = "Judge"; _me.Respawn(); return; }
+			foreach ( var role in g.Roles )
+			{
+				if ( role.Value.Entity is not null && (role.Value.Entity?.IsValid ?? false) ) continue;
+
+				g.Roles[role.Key].Entity = _me;
+				_me.Role = role.Value;
+				_me.Respawn();
+				break;
+			}
 		}
 
 		if ( willsay )
@@ -75,13 +80,12 @@ public class CourtroomBot : Bot
 			willsay = false;
 		}
 
-		return;
-		if ( !(_timeSinceSaidAnything > 5) ) return;
-
-		var vals = Enum.GetValues<Callout>();
-		Callout callout = Callout.None;
-		if ( _random.Next( 0, 10 ) > 7 ) callout = vals[_random.Next(1, vals.Length)];
-		CourtroomGame.Speak( _stupidShitThatICanSay[_random.Next(0, _stupidShitThatICanSay.Length)], callout, Client );
-		_timeSinceSaidAnything = 0;
+		// if ( !(_timeSinceSaidAnything > 5) ) return;
+		//
+		// var vals = Enum.GetValues<Callout>();
+		// Callout callout = Callout.None;
+		// if ( _random.Next( 0, 10 ) > 7 ) callout = vals[_random.Next(1, vals.Length)];
+		// CourtroomGame.Speak( _stupidShitThatICanSay[_random.Next(0, _stupidShitThatICanSay.Length)], callout, Client );
+		// _timeSinceSaidAnything = 0;
 	}
 }

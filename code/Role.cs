@@ -7,11 +7,18 @@ namespace ThekiFake.Courtroom;
 /// This is the struct used to represent the possible roles/positions you can have ingame (for example the judge or the witness etc).
 /// This has just been implemented so there might be areas where this is used in less than optimal ways.
 /// </summary>
-public struct Role
+public partial class Role : BaseNetworkable
 {
-	public IEntity Entity;
-	public string Name;
+	[Net] public IEntity Entity { get; set; }
+	[Net] public string Name { get; set; }
+	[Net] public Vector3 Position { get; set; }
+	[Net] public Rotation Rotation { get; set; }
 	public bool[] PossibleCallouts;
+
+	public Role()
+	{
+		
+	}
 
 	public Role( string name )
 	{
@@ -24,4 +31,9 @@ public struct Role
 	{
 		PossibleCallouts[(int)callout] = true;
 	}
+
+	/*public override string ToString()
+	{
+		return $"Role \"{Name}\" ( [ {string.Join( ',', PossibleCallouts )} ] {Entity?.IsValid})";
+	}*/
 }

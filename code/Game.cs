@@ -1,5 +1,4 @@
-﻿#nullable enable
-using Sandbox;
+﻿using Sandbox;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,46 +6,19 @@ using System.Threading.Tasks;
 
 namespace ThekiFake.Courtroom;
 
-// TODO: Jury, assistant positions, add order in the court/gavel pound or whatever
-// TODO (2): Have the role selection menu hide certain roles if spawnpoints for them arent present in the map (maybe convert the roles list to a hashmap for this) - basically let maps define their own roles
+// TODO: Add order in the court/gavel pound or whatever
+// TODO: If a map has no CourtroomSpawnpoints, just choose a random generic spawnpoint for the player to use
 // ReSharper disable once ClassNeverInstantiated.Global
 public partial class CourtroomGame : GameManager
 {
-	public new static CourtroomGame? Current => GameManager.Current as CourtroomGame;
+	public new static CourtroomGame Current => GameManager.Current as CourtroomGame;
 
 	[ConVar.Replicated( "court_typewriter_delay", Help = "How long to wait before revealing message characters in milliseconds" )]
 	public int TypewriterDelay { get; set; } = 40;
 	
 	[Net] public Hud Hud { get; set; }
 
-	public Role Judge = new("Judge")
-	{
-		PossibleCallouts = new []
-		{
-			true, false, false, false, true
-		}
-	};
-	public Role Defendant = new("Defendant")
-	{
-		PossibleCallouts = new []
-		{
-			true, true, true, true, false
-		}
-	};
-	public Role Prosecutor = new("Prosecutor")
-	{
-		PossibleCallouts = new []
-		{
-			true, true, true, true, false
-		}
-	};
-	public Role Witness = new("Witness")
-	{
-		PossibleCallouts = new []
-		{
-			true, false, false, false, false // cant use objections or anything like that. stupid fucking loser
-		}
-	};
+	[Net] public IDictionary<string, Role> Roles { get; set; }
 	[Net] public IEntity CurrentSpeaker { get; set; }
 	private Queue<Message> MessageQueue { get; set; }
 	private bool IsDisplayingMessage;
@@ -54,12 +26,25 @@ public partial class CourtroomGame : GameManager
 
 	public CourtroomGame()
 	{
-		MessageQueue = new Queue<Message>(); // could maybe use Queue<T> in the future
+		Roles = new Dictionary<string, Role>();
+		MessageQueue = new Queue<Message>();
 		
 		if ( Game.IsClient )
 		{
 			Hud = new Hud();
 		}
+	}
+
+	public override void PostLevelLoaded()
+	{
+		base.PostLevelLoaded();
+
+		// fill our Roles dictionary with the spawnpoints the map has
+		foreach ( var spawnPoint in All.OfType<CourtroomSpawnPoint>() )
+		{
+			Roles.Add( spawnPoint.RoleName, spawnPoint.Role );
+		}
+		Log.Info( $"Successfully loaded {Roles.Count} roles" );
 	}
 
 	~CourtroomGame()
@@ -88,7 +73,7 @@ public partial class CourtroomGame : GameManager
 	[ConCmd.Admin("respawn")]
 	public static void Respawn()
 	{
-		(ConsoleSystem.Caller as CourtroomPawn).Respawn();
+		(ConsoleSystem.Caller as CourtroomPawn)?.Respawn();
 	}
 
 	public override void Simulate( IClient cl )
@@ -133,40 +118,6 @@ public partial class CourtroomGame : GameManager
 		SmoothPan = false;
 	}
 
-	private void SetRole( string? name, IEntity? subject )
-	{
-		Game.AssertServer();
-		if ( name is null ) return;
-
-		switch ( name )
-		{
-			case "Judge":
-				Judge.Entity = subject;
-				break;
-			case "Prosecutor":
-				Prosecutor.Entity = subject;
-				break;
-			case "Defendant":
-				Defendant.Entity = subject;
-				break;
-			case "Witness":
-				Witness.Entity = subject;
-				break;
-		}
-	}
-	
-	public Role? GetRole( string name )
-	{
-		return name switch
-		{
-			"Judge" => Judge,
-			"Prosecutor" => Prosecutor,
-			"Defendant" => Defendant,
-			"Witness" => Witness,
-			_ => null
-		};
-	}
-
 	/// <summary>
 	///		This is called on the server when a user chooses their role
 	/// </summary>
@@ -176,18 +127,31 @@ public partial class CourtroomGame : GameManager
 		var pawn = ConsoleSystem.Caller.Pawn as CourtroomPawn;
 		if ( pawn is not { IsValid: true } ) return;
 		if ( Current == null ) return;
-
-		var p = Current.GetRole( name );
-		if ( p?.Entity is not null )
+		
+		var p = Current.Roles[name];
+		if ( !ConsoleSystem.Caller.IsBot && p.Entity is not null )
 		{
-			RoleMenu.Notice( To.Single( ConsoleSystem.Caller ), name, Current.GetRole( name )?.Entity?.Client.Name );
+			RoleMenu.Notice( To.Single( ConsoleSystem.Caller ), name, Current.Roles[name].Entity?.Client.Name );
 			return;
 		}
-		Current.SetRole( name, pawn );
-		MessageField.SetPossibleCallouts( p?.PossibleCallouts );
-
-		pawn.PositionTitle = name;
+		
+		Current.Roles[name].Entity = pawn; // not sure if i can just do p.Entity
+		Test();
+		MessageField.SetPossibleCallouts( p.PossibleCallouts );
+		
+		pawn.Role = p;
 		pawn.Respawn();
+	}
+
+	[ClientRpc]
+	public static void Test()
+	{
+		if ( Current == null ) return;
+		var i = 0;
+		foreach ( var role in Current.Roles )
+		{
+			Log.Info( $"{i++} ({role.Key}): {role.Value}" );
+		}
 	}
 
 	[ConCmd.Server]
@@ -195,8 +159,8 @@ public partial class CourtroomGame : GameManager
 	{
 		var pawn = ConsoleSystem.Caller.Pawn as CourtroomPawn;
 		if ( pawn == null || Current == null ) return;
-		Current.SetRole( pawn.PositionTitle, null );
-		pawn.PositionTitle = "";
+		Current.Roles[pawn.Role.Name].Entity = null;
+		pawn.Role = null;
 		pawn.Respawn();
 	}
 
@@ -218,7 +182,18 @@ public partial class CourtroomGame : GameManager
 	public static void TestMessage()
 	{
 		if ( Current == null ) return;
-		Current.CurrentSpeaker = All.OfType<SpawnPoint>().FirstOrDefault() ?? ConsoleSystem.Caller.Pawn;
+		Current.CurrentSpeaker = All.OfType<CourtroomSpawnPoint>().FirstOrDefault() ?? ConsoleSystem.Caller.Pawn;
 		Current.DoMessage( new Message( "This is just a test" ));
+	}
+
+	[ConCmd.Server("court_debug_roles")]
+	public static void LogRoles()
+	{
+		if ( Current == null ) return;
+		var i = 0;
+		foreach ( var role in Current.Roles )
+		{
+			Log.Info( $"{i++} ({role.Key}): {role.Value}" );
+		}
 	}
 }

@@ -8,8 +8,7 @@ partial class CourtroomPawn : AnimatedEntity
 {
 	private static readonly Vector3 Rot = new( 0, 0, 1 );
 	
-	[Net] public string PositionTitle { get; set; }
-	public Role? Role => CourtroomGame.Current?.GetRole( PositionTitle );
+	[Net] public Role Role { get; set; }
 	[Net] public bool IsSpeaking { get; set; }
 	[Net] public TimeSince TimeSinceJoined { get; set; }
 	
@@ -25,11 +24,10 @@ partial class CourtroomPawn : AnimatedEntity
 
 	public void Respawn()
 	{
-		if ( !String.IsNullOrEmpty( PositionTitle ) )
+		if ( Role is not null )
 		{
-			var spawnpoint = All.OfType<SpawnPoint>().First( t => t.Tags.Has( PositionTitle ) );
-			Position = spawnpoint.Position;
-			Rotation = spawnpoint.Rotation;
+			Position = Role.Position;
+			Rotation = Role.Rotation;
 			EnableDrawing = true;
 		}
 		else
@@ -58,12 +56,13 @@ partial class CourtroomPawn : AnimatedEntity
 	public override void FrameSimulate( IClient cl )
 	{
 		base.FrameSimulate( cl );
+		if ( Role is null ) return;
 
-		var s = CourtroomGame.Current?.CurrentSpeaker;
+		var s = CourtroomGame.Current?.CurrentSpeaker as CourtroomPawn;
 		s ??= this;
 		
 		var rot = Rotation.LookAt( s.Position, Vector3.Up ).Angles().WithPitch( 0f ).ToRotation();
-		var pos = s.Position + s.Rotation.Forward * 100
+		var pos = s.Position + rot.Backward * 100
 		                             + Vector3.Up * 50
 									 ;
 

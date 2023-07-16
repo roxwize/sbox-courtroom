@@ -1,4 +1,5 @@
-﻿@using Sandbox
+﻿@using System
+@using Sandbox
 @using Sandbox.UI
 
 @namespace ThekiFake.Courtroom
@@ -15,10 +16,12 @@
 		<label style="font-weight:bold;font-size:100px;">Choose your role</label>
 		<div class="role-menu">
 			@* TODO: Add an indicator to these representing player names if the position is already taken *@
-			<label class="btn" onclick=@(() => { Become( "Judge" ); })>Judge</label> 
-			<label class="btn" onclick=@(() => { Become( "Prosecutor" ); })>Prosecutor</label>
-			<label class="btn" onclick=@(() => { Become( "Defendant" ); })>Defendant</label>
-			<label class="btn" onclick=@(() => { Become( "Witness" ); })>Witness</label>
+			@foreach ( var role in CourtroomGame.Current.Roles )
+			{
+				<div class="btn" style="padding:12px;margin:6px;flex-direction:column" onclick="@(() => { Become( role.Key ); })">
+					<label>@role.Key</label>
+				</div>
+			}
 		</div>
 		<label style="font-weight:bold;font-size:50px;" @ref="ErrorLabel"></label>
 	</div>
@@ -42,9 +45,10 @@
 	public RoleMenu()
 	{
 		Current = this;
+		CourtroomGame.LogRoles();
 	}
 	
-	private void Become( string name )
+	private static void Become( string name )
 	{
 		CourtroomGame.BecomePosition( name );
 	}

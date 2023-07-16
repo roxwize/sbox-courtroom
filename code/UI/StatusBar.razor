@@ -8,7 +8,7 @@
 
 <root>
 	<img src="avatar:@Game.LocalClient.SteamId" class="avatar" alt="" />
-	<label style="">@_pawn.PositionTitle</label>
+	<label style="">@_pawn.Role?.Name</label>
 	<label style="font-weight:bold;">@Game.LocalClient.Name</label>
 	<label>|</label>
 	<label class="btn" onclick=@CourtroomGame.Unbecome>Change Role</label>
@@ -20,6 +20,6 @@
 	
 	protected override int BuildHash()
 	{
-		return HashCode.Combine( _pawn.PositionTitle );
+		return HashCode.Combine( _pawn.Role );
 	}
 }

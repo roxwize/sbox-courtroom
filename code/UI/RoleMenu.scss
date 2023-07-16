@@ -11,6 +11,7 @@
   z-index: 99;
   
   #role-main {
+    width: 80%;
     flex-direction: column;
     align-items: center;
     
@@ -23,11 +24,12 @@
       flex-direction: row;
       flex-grow: 1;
       flex-shrink: 1;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
       
       label {
-        padding: 20px;
         font-size: 50px;
-        margin: 20px;
       }
     }
   }
