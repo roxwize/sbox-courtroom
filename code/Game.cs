@@ -97,7 +97,7 @@ public partial class CourtroomGame : GameManager
 		IsDisplayingMessage = true;
 		Log.Info( $"{message.Client.Name}: {message.Contents} {(message.Callout != Callout.None ? "(" + message.Callout + ")" : "")}" );
 
-		CourtroomPawn? e = null;
+		CourtroomPawn e = null;
 		if ( message.Client.IsValid ) e = message.Client?.Pawn as CourtroomPawn;
 		if ( message.Callout != Callout.None )
 		{
@@ -136,22 +136,10 @@ public partial class CourtroomGame : GameManager
 		}
 		
 		Current.Roles[name].Entity = pawn; // not sure if i can just do p.Entity
-		Test();
 		MessageField.SetPossibleCallouts( p.PossibleCallouts );
 		
 		pawn.Role = p;
 		pawn.Respawn();
-	}
-
-	[ClientRpc]
-	public static void Test()
-	{
-		if ( Current == null ) return;
-		var i = 0;
-		foreach ( var role in Current.Roles )
-		{
-			Log.Info( $"{i++} ({role.Key}): {role.Value}" );
-		}
 	}
 
 	[ConCmd.Server]

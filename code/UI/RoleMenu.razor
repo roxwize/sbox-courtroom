@@ -1,4 +1,5 @@
 ﻿@using System
+@using System.Text
 @using Sandbox
 @using Sandbox.UI
 
@@ -16,10 +17,15 @@
 		<label style="font-weight:bold;font-size:100px;">Choose your role</label>
 		<div class="role-menu">
 			@* TODO: Add an indicator to these representing player names if the position is already taken *@
+			@* AND HAVE IT UPDATE *@
 			@foreach ( var role in CourtroomGame.Current.Roles )
 			{
 				<div class="btn" style="padding:12px;margin:6px;flex-direction:column" onclick="@(() => { Become( role.Key ); })">
 					<label>@role.Key</label>
+					@if ( role.Value.Entity is not null )
+                    {
+                    	<label style="font-size:35px;font-style:italic;">@(role.Value.Entity.Client.Name)</label>
+                    }
 				</div>
 			}
 		</div>
@@ -45,11 +51,15 @@
 	public RoleMenu()
 	{
 		Current = this;
-		CourtroomGame.LogRoles();
 	}
 	
 	private static void Become( string name )
 	{
 		CourtroomGame.BecomePosition( name );
+	}
+
+	protected override int BuildHash()
+	{
+		return HashCode.Combine( CourtroomGame.Current.Roles );
 	}
 }
