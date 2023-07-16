@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 namespace ThekiFake.Courtroom;
 
 // TODO: Add order in the court/gavel pound or whatever
-// TODO: If a map has no CourtroomSpawnpoints, just choose a random generic spawnpoint for the player to use
 // ReSharper disable once ClassNeverInstantiated.Global
 public partial class CourtroomGame : GameManager
 {
@@ -40,9 +39,17 @@ public partial class CourtroomGame : GameManager
 		base.PostLevelLoaded();
 
 		// fill our Roles dictionary with the spawnpoints the map has
-		foreach ( var spawnPoint in All.OfType<CourtroomSpawnPoint>() )
+		var i = 0;
+		foreach ( var spawnPoint in All.OfType<SpawnPoint>() )
 		{
-			Roles.Add( spawnPoint.RoleName, spawnPoint.Role );
+			if ( spawnPoint is CourtroomSpawnPoint p ) Roles.Add( p.RoleName, p.Role );
+			else Roles.Add( $"Spawnpoint {++i}", new Role($"Spawnpoint {i}")
+			{
+				Name = $"Spawnpoint {i}",
+				PossibleCallouts = new [] { true, true, true, true, false },
+				Position = spawnPoint.Position,
+				Rotation = spawnPoint.Rotation
+			} );
 		}
 		Log.Info( $"Successfully loaded {Roles.Count} roles" );
 	}
@@ -152,6 +159,7 @@ public partial class CourtroomGame : GameManager
 	{
 		var pawn = ConsoleSystem.Caller.Pawn as CourtroomPawn;
 		if ( pawn == null || Current == null ) return;
+		Log.Info( Current.Roles[pawn.Role.Name] );
 		Current.Roles[pawn.Role.Name].Entity = null;
 		pawn.Role = null;
 		pawn.Respawn();

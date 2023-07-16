@@ -89,6 +89,16 @@
         "Addons": "",
         "PreLaunchCommand": "",
         "PostLaunchCommand": ""
+      },
+      {
+        "Name": "Mappe Generique",
+        "GameIdent": "theki.courtroom#local",
+        "MapName": "facepunch.flatgrass",
+        "MaxPlayers": 64,
+        "GameSettings": {},
+        "Addons": "",
+        "PreLaunchCommand": "",
+        "PostLaunchCommand": ""
       }
     ]
   }
