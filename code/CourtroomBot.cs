@@ -67,9 +67,7 @@ public class CourtroomBot : Bot
 			{
 				if ( role.Value.Entity is not null && (role.Value.Entity?.IsValid ?? false) ) continue;
 
-				g.Roles[role.Key].Entity = _me;
-				_me.Role = role.Value;
-				_me.Respawn();
+				CourtroomGame.BecomePosition( Client, role.Key );
 				break;
 			}
 		}

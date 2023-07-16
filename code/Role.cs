@@ -9,7 +9,7 @@ namespace ThekiFake.Courtroom;
 /// </summary>
 public partial class Role : BaseNetworkable
 {
-	[Net, Change] public Entity Entity { get; set; }
+	[Net] public Entity Entity { get; set; }
 	[Net] public string Name { get; set; }
 	[Net] public Vector3 Position { get; set; }
 	[Net] public Rotation Rotation { get; set; }
@@ -25,12 +25,6 @@ public partial class Role : BaseNetworkable
 		Name = name;
 		PossibleCallouts = new bool[Enum.GetNames( typeof( Callout ) ).Length];
 		PossibleCallouts[0] = true;
-	}
-
-	public void OnEntityChanged( Entity oldValue, Entity newValue )
-	{
-		RoleMenu.Current.StateHasChanged();
-		Log.Info( newValue );
 	}
 
 	public void SetCanUse( Callout callout )

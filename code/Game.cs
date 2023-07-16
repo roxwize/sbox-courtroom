@@ -124,18 +124,23 @@ public partial class CourtroomGame : GameManager
 	[ConCmd.Server]
 	public static void BecomePosition( string name )
 	{
-		var pawn = ConsoleSystem.Caller.Pawn as CourtroomPawn;
+		BecomePosition( ConsoleSystem.Caller, name );
+	}
+
+	public static void BecomePosition( IClient cl, string name )
+	{
+		var pawn = cl.Pawn as CourtroomPawn;
 		if ( pawn is not { IsValid: true } ) return;
 		if ( Current == null ) return;
 		
 		var p = Current.Roles[name];
-		if ( !ConsoleSystem.Caller.IsBot && p.Entity is not null )
+		if ( !cl.IsBot && p.Entity is not null )
 		{
-			RoleMenu.Notice( To.Single( ConsoleSystem.Caller ), name, Current.Roles[name].Entity?.Client.Name );
+			RoleMenu.Notice( To.Single( cl ), name, Current.Roles[name].Entity?.Client.Name );
 			return;
 		}
 		
-		Current.Roles[name].Entity = pawn; // not sure if i can just do p.Entity
+		p.Entity = pawn;
 		MessageField.SetPossibleCallouts( p.PossibleCallouts );
 		
 		pawn.Role = p;
